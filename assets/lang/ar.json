@@ -1,0 +1,46 @@
+{
+  "app": {
+    "title": "تسكاتي",
+    "welcome": "مرحباً بك في تسكاتي",
+    "description": "تطبيق إدارة المهام الشخصي"
+  },
+  "common": {
+    "add": "إضافة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "ok": "موافق",
+    "yes": "نعم",
+    "no": "لا",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجح"
+  },
+  "tasks": {
+    "title": "المهام",
+    "add_task": "إضافة مهمة",
+    "edit_task": "تعديل المهمة",
+    "task_title": "عنوان المهمة",
+    "task_description": "وصف المهمة",
+    "due_date": "تاريخ الاستحقاق",
+    "priority": "الأولوية",
+    "high": "عالية",
+    "medium": "متوسطة",
+    "low": "منخفضة",
+    "completed": "مكتملة",
+    "pending": "قيد الانتظار",
+    "no_tasks": "لا توجد مهام بعد",
+    "create_first_task": "أنشئ مهمتك الأولى للبدء!"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "theme": "المظهر",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام",
+    "notifications": "الإشعارات",
+    "about": "حول"
+  }
+}

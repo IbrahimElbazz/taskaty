@@ -1,0 +1,46 @@
+{
+  "app": {
+    "title": "Taskaty",
+    "welcome": "Welcome to Taskaty",
+    "description": "Your personal task management app"
+  },
+  "common": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "add_task": "Add Task",
+    "edit_task": "Edit Task",
+    "task_title": "Task Title",
+    "task_description": "Task Description",
+    "due_date": "Due Date",
+    "priority": "Priority",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "completed": "Completed",
+    "pending": "Pending",
+    "no_tasks": "No tasks yet",
+    "create_first_task": "Create your first task to get started!"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "notifications": "Notifications",
+    "about": "About"
+  }
+}
