@@ -117,7 +117,7 @@ class AuthRepository {
     try {
       // Check if Google Play Services are available (Android only)
       if (defaultTargetPlatform == TargetPlatform.android) {
-        final isAvailable = await _googleSignIn.isSignedIn();
+        await _googleSignIn.isSignedIn();
         // This will trigger the Google Play Services dialog if needed
       }
 
@@ -282,21 +282,17 @@ class AuthRepository {
           return 'يوجد حساب بنفس البريد الإلكتروني مع مزود خدمة مختلف';
         case 'invalid-credential':
           return 'بيانات الاعتماد غير صحيحة';
-        case 'operation-not-allowed':
-          return 'تسجيل الدخول بجوجل غير مفعل في إعدادات Firebase';
         case 'popup-closed-by-user':
           return 'تم إغلاق نافذة تسجيل الدخول';
         case 'popup-blocked':
           return 'تم حظر نافذة تسجيل الدخول من المتصفح';
         case 'cancelled-popup-request':
           return 'تم إلغاء طلب تسجيل الدخول';
-        case 'network-request-failed':
-          return 'فشل في الاتصال بالشبكة، تحقق من اتصالك بالإنترنت';
         default:
           return 'حدث خطأ غير متوقع: ${e.message}';
       }
     }
-    
+
     // Handle Google Sign-In specific errors
     if (e.toString().contains('network_error')) {
       return 'فشل في الاتصال بالشبكة، تحقق من اتصالك بالإنترنت';
@@ -313,7 +309,7 @@ class AuthRepository {
     if (e.toString().contains('developer_error')) {
       return 'خطأ في إعدادات المطور، تحقق من تكوين Google Sign-In';
     }
-    
+
     return 'حدث خطأ غير متوقع: ${e.toString()}';
   }
 }

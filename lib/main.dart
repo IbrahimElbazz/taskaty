@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -16,18 +17,18 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print('Firebase initialized successfully');
+    debugPrint('Firebase initialized successfully');
   } catch (e) {
-    print('Error initializing Firebase: $e');
+    debugPrint('Error initializing Firebase: $e');
     // You might want to show a user-friendly error message here
   }
 
   try {
     // Initialize Dependency Injection
     await configureDependencies();
-    print('Dependency injection configured successfully');
+    debugPrint('Dependency injection configured successfully');
   } catch (e) {
-    print('Error configuring dependencies: $e');
+    debugPrint('Error configuring dependencies: $e');
   }
 
   runApp(const MyApp());
@@ -45,13 +46,18 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return BlocProvider(
           create: (context) => getIt<AuthCubit>(),
-          child: MaterialApp(
+          child: CupertinoApp(
             title: AppConfig.appName,
             debugShowCheckedModeBanner: false,
-            theme: AppConfig.lightTheme,
-            darkTheme: AppConfig.darkTheme,
-            themeMode: ThemeMode.system,
+            theme: AppConfig.cupertinoLightTheme,
             home: const AuthWrapper(),
+            localizationsDelegates: const [
+              DefaultMaterialLocalizations.delegate,
+              DefaultCupertinoLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: AppConfig.supportedLocales,
+            locale: AppConfig.defaultLocale,
           ),
         );
       },

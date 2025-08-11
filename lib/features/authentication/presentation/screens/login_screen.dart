@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:taskaty/shared/widgets/custom_button.dart';
 import 'package:taskaty/shared/widgets/custom_text_field.dart';
+import 'package:taskaty/core/app_config.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_states.dart';
-
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 
@@ -16,16 +16,44 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
+    _animationController.forward();
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -48,206 +76,308 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocListener<AuthCubit, AuthState>(
+    final isDark = CupertinoTheme.of(context).brightness == Brightness.dark;
+
+    return CupertinoPageScaffold(
+      backgroundColor: isDark
+          ? AppConfig.darkBackgroundColor
+          : AppConfig.backgroundColor,
+      child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           state.whenOrNull(
             error: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(message), backgroundColor: Colors.red),
+              showCupertinoDialog(
+                context: context,
+                builder: (context) => CupertinoAlertDialog(
+                  title: const Text('خطأ في تسجيل الدخول'),
+                  content: Text(message),
+                  actions: [
+                    CupertinoDialogAction(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.read<AuthCubit>().clearError();
+                      },
+                      child: const Text('إعادة المحاولة'),
+                    ),
+                    CupertinoDialogAction(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('إغلاق'),
+                    ),
+                  ],
+                ),
               );
             },
           );
         },
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(24.w),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(height: 60.h),
-
-                  // Logo and Title
-                  Icon(
-                    Icons.task_alt,
-                    size: 80.w,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  SizedBox(height: 24.h),
-                  Text(
-                    'مرحباً بك في Taskaty',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    'سجل دخولك لإدارة مهامك',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 48.h),
-
-                  // Email Field
-                  CustomTextField(
-                    controller: _emailController,
-                    label: 'البريد الإلكتروني',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'يرجى إدخال البريد الإلكتروني';
-                      }
-                      if (!RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                      ).hasMatch(value)) {
-                        return 'يرجى إدخال بريد إلكتروني صحيح';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16.h),
-
-                  // Password Field
-                  CustomTextField(
-                    controller: _passwordController,
-                    label: 'كلمة المرور',
-                    prefixIcon: Icon(Icons.lock_outlined),
-                    obscureText: _obscurePassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'يرجى إدخال كلمة المرور';
-                      }
-                      if (value.length < 6) {
-                        return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 8.h),
-
-                  // Forgot Password
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ForgotPasswordScreen(),
-                          ),
-                        );
-                      },
-                      child: const Text('نسيت كلمة المرور؟'),
-                    ),
-                  ),
-                  SizedBox(height: 24.h),
-
-                  // Sign In Button
-                  BlocBuilder<AuthCubit, AuthState>(
-                    builder: (context, state) {
-                      return CustomButton(
-                        onPressed: state.maybeWhen(
-                          loading: () => null,
-                          orElse: () => _signInWithEmailAndPassword,
-                        ),
-                        text: state.maybeWhen(
-                          loading: () => 'جاري تسجيل الدخول...',
-                          orElse: () => 'تسجيل الدخول',
-                        ),
-                        isLoading: state.maybeWhen(
-                          loading: () => true,
-                          orElse: () => false,
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: 24.h),
-
-                  // Divider
-                  Row(
+            padding: EdgeInsets.all(AppConfig.paddingL),
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(child: Divider(color: Colors.grey[300])),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        child: Text(
-                          'أو',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ),
-                      Expanded(child: Divider(color: Colors.grey[300])),
+                      SizedBox(height: 60.h),
+
+                      // Logo and Title
+                      _buildHeader(),
+                      SizedBox(height: AppConfig.paddingXXL),
+
+                      // Form Fields
+                      _buildFormFields(),
+                      SizedBox(height: AppConfig.paddingL),
+
+                      // Sign In Button
+                      _buildSignInButton(),
+                      SizedBox(height: AppConfig.paddingL),
+
+                      // Social Login
+                      _buildSocialLogin(),
+                      SizedBox(height: AppConfig.paddingXXL),
+
+                      // Register Link
+                      _buildRegisterLink(),
                     ],
                   ),
-                  SizedBox(height: 24.h),
-
-                  // Social Login Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _SocialLoginButton(
-                          onPressed: _signInWithGoogle,
-                          icon: Icons.g_mobiledata,
-                          text: 'Google',
-                          color: Colors.red,
-                        ),
-                      ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: _SocialLoginButton(
-                          onPressed: _signInWithApple,
-                          icon: Icons.apple,
-                          text: 'Apple',
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 48.h),
-
-                  // Register Link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'ليس لديك حساب؟ ',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RegisterScreen(),
-                            ),
-                          );
-                        },
-                        child: const Text('إنشاء حساب'),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildHeader() {
+    final isDark = CupertinoTheme.of(context).brightness == Brightness.dark;
+    final textColor = isDark
+        ? AppConfig.darkTextPrimaryColor
+        : AppConfig.textPrimaryColor;
+    final secondaryTextColor = isDark
+        ? AppConfig.darkTextSecondaryColor
+        : AppConfig.textSecondaryColor;
+
+    return Column(
+      children: [
+        Container(
+          width: 80.w,
+          height: 80.h,
+          decoration: BoxDecoration(
+            color: AppConfig.primaryColor,
+            borderRadius: BorderRadius.circular(AppConfig.radiusXXL),
+            boxShadow: [
+              BoxShadow(
+                color: AppConfig.primaryColor.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Icon(
+            CupertinoIcons.check_mark_circled_solid,
+            size: 40.sp,
+            color: CupertinoColors.white,
+          ),
+        ),
+        SizedBox(height: AppConfig.paddingL),
+        Text(
+          'مرحباً بك في Taskaty',
+          style: TextStyle(
+            fontSize: 28.sp,
+            fontWeight: FontWeight.w700,
+            color: textColor,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: AppConfig.paddingS),
+        Text(
+          'سجل دخولك لإدارة مهامك بسهولة',
+          style: TextStyle(fontSize: 16.sp, color: secondaryTextColor),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFormFields() {
+    return Column(
+      children: [
+        CustomTextField(
+          controller: _emailController,
+          label: 'البريد الإلكتروني',
+          hint: 'أدخل بريدك الإلكتروني',
+          prefixIcon: Icon(CupertinoIcons.mail, color: AppConfig.primaryColor),
+          keyboardType: TextInputType.emailAddress,
+          isRequired: true,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'يرجى إدخال البريد الإلكتروني';
+            }
+            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+              return 'يرجى إدخال بريد إلكتروني صحيح';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: AppConfig.paddingM),
+        CustomTextField(
+          controller: _passwordController,
+          label: 'كلمة المرور',
+          hint: 'أدخل كلمة المرور',
+          prefixIcon: Icon(CupertinoIcons.lock, color: AppConfig.primaryColor),
+          obscureText: _obscurePassword,
+          isRequired: true,
+          suffixIcon: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
+            child: Icon(
+              _obscurePassword ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
+              color: AppConfig.textSecondaryColor,
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'يرجى إدخال كلمة المرور';
+            }
+            if (value.length < 6) {
+              return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: AppConfig.paddingS),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (context) => const ForgotPasswordScreen(),
+                ),
+              );
+            },
+            child: Text(
+              'نسيت كلمة المرور؟',
+              style: TextStyle(color: AppConfig.primaryColor, fontSize: 14.sp),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSignInButton() {
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        return CustomButton(
+          onPressed: state.maybeWhen(
+            loading: () => null,
+            orElse: () => _signInWithEmailAndPassword,
+          ),
+          text: state.maybeWhen(
+            loading: () => 'جاري تسجيل الدخول...',
+            orElse: () => 'تسجيل الدخول',
+          ),
+          isLoading: state.maybeWhen(loading: () => true, orElse: () => false),
+        );
+      },
+    );
+  }
+
+  Widget _buildSocialLogin() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _buildDivider()),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppConfig.paddingM),
+              child: Text(
+                'أو',
+                style: TextStyle(
+                  color: AppConfig.textSecondaryColor,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ),
+            Expanded(child: _buildDivider()),
+          ],
+        ),
+        SizedBox(height: AppConfig.paddingL),
+        Row(
+          children: [
+            Expanded(
+              child: _SocialLoginButton(
+                onPressed: _signInWithGoogle,
+                icon: CupertinoIcons.globe,
+                text: 'Google',
+                color: AppConfig.errorColor,
+              ),
+            ),
+            SizedBox(width: AppConfig.paddingM),
+            Expanded(
+              child: _SocialLoginButton(
+                onPressed: _signInWithApple,
+                icon: CupertinoIcons.device_phone_portrait,
+                text: 'Apple',
+                color: AppConfig.textPrimaryColor,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDivider() {
+    final isDark = CupertinoTheme.of(context).brightness == Brightness.dark;
+    return Container(
+      height: 1,
+      color: isDark ? AppConfig.darkBorderColor : AppConfig.borderColor,
+    );
+  }
+
+  Widget _buildRegisterLink() {
+    final isDark = CupertinoTheme.of(context).brightness == Brightness.dark;
+    final secondaryTextColor = isDark
+        ? AppConfig.darkTextSecondaryColor
+        : AppConfig.textSecondaryColor;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'ليس لديك حساب؟ ',
+          style: TextStyle(color: secondaryTextColor, fontSize: 14.sp),
+        ),
+        CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (context) => const RegisterScreen()),
+            );
+          },
+          child: Text(
+            'إنشاء حساب',
+            style: TextStyle(
+              color: AppConfig.primaryColor,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -267,13 +397,41 @@ class _SocialLoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: color),
-      label: Text(text),
-      style: OutlinedButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: 12.h),
-        side: BorderSide(color: Colors.grey[300]!),
+    final isDark = CupertinoTheme.of(context).brightness == Brightness.dark;
+    final borderColor = isDark
+        ? AppConfig.darkBorderColor
+        : AppConfig.borderColor;
+    final textColor = isDark
+        ? AppConfig.darkTextPrimaryColor
+        : AppConfig.textPrimaryColor;
+
+    return Container(
+      height: 50.h,
+      decoration: BoxDecoration(
+        color: isDark ? AppConfig.darkCardColor : AppConfig.cardColor,
+        borderRadius: BorderRadius.circular(AppConfig.radiusM),
+        border: Border.all(color: borderColor),
+      ),
+      child: CupertinoButton(
+        onPressed: onPressed,
+        color: CupertinoColors.systemBackground,
+        borderRadius: BorderRadius.circular(AppConfig.radiusM),
+        padding: EdgeInsets.symmetric(horizontal: AppConfig.paddingM),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 20.sp),
+            SizedBox(width: AppConfig.paddingS),
+            Text(
+              text,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

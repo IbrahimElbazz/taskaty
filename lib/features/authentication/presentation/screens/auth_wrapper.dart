@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/auth_cubit.dart';
@@ -12,39 +13,15 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
-        return state.when(
+        return state.maybeWhen(
+          orElse: () => const SizedBox.shrink(),
           initial: () =>
               const Scaffold(body: Center(child: CircularProgressIndicator())),
           loading: () =>
               const Scaffold(body: Center(child: CircularProgressIndicator())),
           authenticated: (user) => const HomeScreen(),
           unauthenticated: () => const LoginScreen(),
-          error: (message) => Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'خطأ في المصادقة',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    message,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<AuthCubit>().clearError();
-                    },
-                    child: const Text('إعادة المحاولة'),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          error: (message) => const LoginScreen(),
         );
       },
     );
