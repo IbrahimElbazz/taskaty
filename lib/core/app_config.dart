@@ -27,6 +27,38 @@ class AppConfig {
   static const Color textSecondaryColor = Color(0xFF8E8E93); // iOS Gray
   static const Color borderColor = Color(0xFFC6C6C8); // iOS Light Gray
 
+  // Instagram-style color scheme
+  static const Color instagramBlack = Color(0xFF000000);
+  static const Color instagramDarkGray = Color(
+    0xFF121212,
+  ); // A slightly lighter black for depth
+  static const Color instagramLightGray = Color(
+    0xFFF5F5F5,
+  ); // Soft gray for backgrounds
+  static const Color instagramWhite = Color(
+    0xFFFFFFFF,
+  ); // White for text and elements
+
+  static const Color instagramPink = Color(
+    0xFFE1306C,
+  ); // Instagram's vibrant pink
+  static const Color instagramPurple = Color(
+    0xFF833AB4,
+  ); // Purple from Instagram logo
+  static const Color instagramOrange = Color(
+    0xFFFCAF45,
+  ); // Orange from Instagram logo
+  static const Color instagramGradientEnd = Color(
+    0xFFE1306C,
+  ); // Pink from Instagram logo
+  static const Color instagramTextPrimary = Color(0xFFFFFFFF); // White text
+  static const Color instagramTextSecondary = Color(
+    0xFFA8A8A8,
+  ); // A slightly lighter gray for secondary text
+  static const Color instagramBorder = Color(
+    0xFF38383A,
+  ); // Similar to iOS Dark Gray for borders
+
   // Dark mode colors
   static const Color darkBackgroundColor = Color(0xFF000000); // Black
   static const Color darkCardColor = Color(0xFF1C1C1E); // iOS Dark Gray
@@ -43,7 +75,7 @@ class AppConfig {
         brightness: Brightness.light,
       ),
       appBarTheme: const AppBarTheme(
-        centerTitle: true, 
+        centerTitle: true,
         elevation: 0,
         backgroundColor: cardColor,
         foregroundColor: textPrimaryColor,
@@ -74,7 +106,7 @@ class AppConfig {
         brightness: Brightness.dark,
       ),
       appBarTheme: const AppBarTheme(
-        centerTitle: true, 
+        centerTitle: true,
         elevation: 0,
         backgroundColor: darkCardColor,
         foregroundColor: darkTextPrimaryColor,
